@@ -18,28 +18,42 @@
 <div id="app">
     <div class="header">
         <h1>Vue.js Poster Store</h1>
+        <form class="searchBar" v-on:submit.prevent="onSubmit">
+            <input type="text" v-model="search" placeholder="Search title.."/>
+            <input type="submit" value="Search" class="btn">
+        </form>
     </div>
     <div class="main">
         <div>
+          <!--  <div>
+            <label>Search for product:</label><input type="text" v-model="search" placeholder="Search title.."/>
+            </div>-->
+
+            <div>
             <ul class="products">
-            <li class="product" v-for="product in products">
-                <h4 class="product-title">{{ product.name }}</h4>
-                <button class="add-to-cart" @click="addItem(product)">Add to cart</button>
+            <li class="product" v-for="product in filteredProducts">
+                <div class="product-title">{{ product.name }}</div>
+                <button class="btn add-to-cart" @click="addItem(product)">Add to cart</button>
             </li>
                 <li v-if="products.length == 0">No Products found</li>
             </ul>
+            </div>
 
         </div>
         <div class="cart">
             <h2>Shopping Cart</h2>
             <div>
-               <div v-if="cart.items.length>0"> Total: {{ calculateTotal }}</div>
+               <div v-if="cart.items.length>0"> Total: {{ calculateTotal | currency }}</div>
                 <div v-else>No Items in cart</div>
                 <ul class="cart-items">
                 <li class="item" v-for="item in cart.items">
-                    <div class="item-title">{{ item.name }}</div>
-                    <span class="item-qty">Quantity: {{ item.quantity }}</span>
-                    <button class="remove-from-cart" @click="removeItem(item)">Remove from cart</button>
+                    <div class="item-id">{{ item.id | productId }}</div>
+                    <div class="item-title">{{ item.title }}</div>
+                    <div class="item-qty">{{ item.price | currency }} * {{ item.quantity }}</div>
+                   <!-- <div class="item-sub-total">Sub Total: {{ calculateSubTotal(item) }}</div>-->
+                    <!--<button class="remove-from-cart" @click="removeItem(item)">Remove from cart</button>-->
+                    <button class="btn increment-quantity" @click="addItem(item)">+</button>
+                    <button class="btn decrement-quantity" @click="removeItem(item)">-</button>
                 </li>
                 </ul>
             </div>
@@ -50,6 +64,8 @@
 <!-- Scripts -->
 <script src="reload/reload.js"></script>
 <script src="node_modules/vue/dist/vue.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.0.4/fuse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.0"></script>
 <script type="text/javascript" src="public/script.js"></script>
 
 </body>
