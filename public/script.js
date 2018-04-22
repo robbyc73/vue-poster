@@ -1,40 +1,23 @@
 var PRICE = 9.99;
 new Vue({
     el: '#app',
-    data: {
-        search: '',
-        products: [
-            {
-                id: 1,
-                name: 'apple',
-              price: 19.99,
-              quantity: 0
-            },
-            {
-                id: 2,
-                name: 'orange',
-                price: 12.32,
-                quantity: 0
-            },
-            {
-                id: 3,
-                name: 'pear',
-                price: 45.01,
-                quantity: 0
-            }
-        ],
-        filteredProducts: [
-
-        ],
-        cart: {
-            items: []
-        }
-    },
-    watch: {
-        // whenever search changes, this function will run
-        search: function (newSearch, oldSearch) {
-            //this.filteredProducts = this.filterProducts(newSearch);
-        }
+    props: {
+       search: {
+           type: String,
+           'default': ''
+       },
+       filteredProducts: {
+           type: Array,
+           'default': function() {
+               return []
+           }
+       },
+       cart: {
+           type: Array,
+           'default': function() {
+               return []
+           }
+       }
     },
     filters: {
         productId: function(id) {
@@ -47,14 +30,15 @@ new Vue({
     computed: {
         calculateTotal: function () {
             var currentTotal = 0;
-            for (i = 0; i < this.cart.items.length; i++) {
-                currentTotal += this.calculateSubTotal(this.cart.items[i]);
+            var self = this;
+            for (var i = 0; i < self.cart.length; i++) {
+                currentTotal += self.calculateSubTotal(self.cart[i]);
             }
             return currentTotal;
         },
     },
         methods: {
-            filterProducts: function(search) {
+            /*filterProducts: function(search) {
                 var options = {
                     shouldSort: true,
                     threshold: 0.6,
@@ -69,7 +53,7 @@ new Vue({
                 var fuse = new Fuse(this.products, options);
                 var filteredProducts = fuse.search(search);
                 return filteredProducts;
-            },
+            },*/
             calculateSubTotal: function (item) {
                 var subTotal = 0;
 
@@ -80,44 +64,48 @@ new Vue({
 
             addItem: function (item) {
                 var itemInCartIndex = this.isItemInCartIndex(item);
+                var self = this;
 
                 if(itemInCartIndex === false) {
-                    item.quantity = 1;
-                    item.price = PRICE;
-                    this.cart.items.push(item);
+                    self.cart.push({
+                        id: item.id,
+                        quantity: 1,
+                        price: PRICE
+                    });
                 } else {
-                    this.cart.items[itemInCartIndex].quantity++;
+                    self.cart[itemInCartIndex].quantity++;
                 }
 
             },
-            removeItem: function (item) {
-                var itemInCartIndex = this.isItemInCartIndex(item);
-
-                if(itemInCartIndex >= 0) {
-                    this.cart.items[itemInCartIndex].quantity--;
-                    if(this.cart.items[itemInCartIndex].quantity == 0) {
-                        this.cart.items.splice(itemInCartIndex, 1);
-                    }
+            increaseQuantity: function(index) {
+                this.cart[index].quantity++;
+            },
+            decreaseQuantity: function(index) {
+                this.cart[index].quantity--;
+                if(this.cart[index].quantity == 0) {
+                    this.cart.splice(index, 1);
                 }
             },
             isItemInCartIndex: function (item) {
                 var itemInCartIndex = false;
-                for (i = 0; i < this.cart.items.length; i++) {
-                    if (this.cart.items[i].id == item.id) {
+                var self = this;
+                for (var i = 0; i < self.cart.length; i++) {
+                    if (self.cart[i].id == item.id) {
                         itemInCartIndex = i;
-                        break;
+                        return itemInCartIndex;
                     }
                 }
                 return itemInCartIndex;
             },
 
             onSubmit: function() {
+                var self = this;
                 //this.filteredProducts = this.filterProducts(this.search);
 
                 // GET /someUrl
                 this.$http.get('/search/'+this.search).then(response => {
                     // get body data
-                    this.filteredProducts = response.body;
+                    self.filteredProducts = response.body;
                 }, response => {
                     // error callback
                 });
