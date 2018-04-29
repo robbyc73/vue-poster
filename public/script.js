@@ -11,6 +11,12 @@ new Vue({
             type: String,
             'default': ''
         },
+        results: {
+            type: Array,
+            'default': function() {
+                return []
+            }
+        },
        filteredProducts: {
            type: Array,
            'default': function() {
@@ -30,7 +36,7 @@ new Vue({
        price: {
            type: Number,
            'default': PRICE
-       }
+       },
     },
     filters: {
         productId: function(id) {
@@ -71,6 +77,12 @@ new Vue({
                 var filteredProducts = fuse.search(search);
                 return filteredProducts;
             },*/
+            appendItems() {
+                 if(this.filteredProducts.length < this.results.length) {
+                     var append = this.results.slice(this.filteredProducts.length,this.filteredProducts.length + LOAD_NUM);
+                     this.filteredProducts = this.filteredProducts.concat(append);
+                 }
+            },
             calculateSubTotal: function (item) {
                 var subTotal = 0;
 
@@ -119,15 +131,17 @@ new Vue({
 
             onSubmit: function() {
                 var self = this;
-                self.cart = [];
+                self.cart = []
                 self.filteredProducts = [];
+
                 self.loading = true;
                 //this.filteredProducts = this.filterProducts(this.search);
 
                 // GET /someUrl
                 this.$http.get('/search/'+this.search).then(response => {
                     // get body data
-                    self.filteredProducts = response.body.slice(0,LOAD_NUM);
+                    self.results = response.data;
+                    self.appendItems();
                     self.lastSearch = self.search;
                     self.loading = false;
                 }, response => {
@@ -139,10 +153,12 @@ new Vue({
         },
         mounted(){
             this.onSubmit();
-        },
-        updated(){
-            var elem = this.$el
-            console.log("elem "+elem.clientHeight)
-            elem.scrollTop = elem.clientHeight;
+            var self = this;
+
+            var elem = document.getElementById('product-list-bottom');
+            var watcher = scrollMonitor.create(elem);
+            watcher.enterViewport(function() {
+                self.appendItems();
+            });
         },
     });
