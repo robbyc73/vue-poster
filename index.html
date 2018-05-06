@@ -15,7 +15,7 @@
     <link rel="stylesheet" type="text/css" href="public/style.css">
 </head>
 <body>
-<div id="app">
+<div id="app" v-cloak>
     <div class="header">
         <h1>Vue.js Poster Store</h1>
         <form class="searchBar" v-on:submit.prevent="onSubmit(10)">
@@ -41,7 +41,11 @@
             </li>
             </ul>
             </div>
-            <div id="product-list-bottom"></div>
+            <div id="product-list-bottom">
+                <div v-if="allResultsDisplayed">
+                    All results displayed
+                </div>
+            </div>
         </div>
 
         <div class="cart">

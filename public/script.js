@@ -58,26 +58,13 @@ new Vue({
         },
         numberSearchResultsFound: function() {
             return this.filteredProducts.length+' results found for search term '+this.lastSearch;
+        },
+        allResultsDisplayed: function() {
+            return this.filteredProducts.length === this.results.length && this.results.length > 0;
         }
     },
         methods: {
-            /*filterProducts: function(search) {
-                var options = {
-                    shouldSort: true,
-                    threshold: 0.6,
-                    location: 0,
-                    distance: 100,
-                    maxPatternLength: 32,
-                    minMatchCharLength: 1,
-                    keys: [
-                        "name",
-                    ]
-                };
-                var fuse = new Fuse(this.products, options);
-                var filteredProducts = fuse.search(search);
-                return filteredProducts;
-            },*/
-            appendItems() {
+            appendItems: function() {
                  if(this.filteredProducts.length < this.results.length) {
                      var append = this.results.slice(this.filteredProducts.length,this.filteredProducts.length + LOAD_NUM);
                      this.filteredProducts = this.filteredProducts.concat(append);
@@ -130,6 +117,9 @@ new Vue({
             },
 
             onSubmit: function() {
+                if(!this.search.length) {
+                    return false;
+                }
                 var self = this;
                 self.cart = []
                 self.filteredProducts = [];
